@@ -97,3 +97,7 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# --- Custom large assets to ignore ---
+Assets/unity-chan\!/Unity-chan\! Model/Art/UnityChanShader/Texture/guide.tga
+Assets/unity-chan\!/Unity-chan\! Model/Art/UnityChanShader/Texture/face_00.tga
