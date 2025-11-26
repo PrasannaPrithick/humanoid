@@ -1,12 +1,18 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class SmileController : MonoBehaviour
 {
+    
+
+    
     [SerializeField] private Animator animator;
-    [SerializeField] private AudioSource audioSource;
     [SerializeField] private Button smileButton;
     [SerializeField] private string smileTriggerName = "SmileTrigger";
+
+    // NEW: reference to the viseme lip sync
+    [SerializeField] private SimpleVisemeLipSync lipSync;
 
     private bool isPlaying;
 
@@ -18,29 +24,28 @@ public class SmileController : MonoBehaviour
     private void OnSmilePressed()
     {
         if (isPlaying) return;
-
         isPlaying = true;
 
-        if (animator != null && !string.IsNullOrEmpty(smileTriggerName))
+        // trigger body animation
+        if (animator != null)
         {
             animator.SetTrigger(smileTriggerName);
         }
 
-        if (audioSource != null)
+        // start audio + mouth visemes
+        if (lipSync != null)
         {
-            audioSource.Play();
-            // LipSyncBlendshape listens to this automatically
+            lipSync.PlayLipSync();
         }
 
-        // Optional: reset lock after audio ends
-        StartCoroutine(ResetAfterAudio());
+        StartCoroutine(WaitForEnd());
     }
 
-    private System.Collections.IEnumerator ResetAfterAudio()
+    private IEnumerator WaitForEnd()
     {
-        if (audioSource != null)
+        if (lipSync != null && lipSync.audioSource != null)
         {
-            while (audioSource.isPlaying)
+            while (lipSync.audioSource.isPlaying)
                 yield return null;
         }
 
