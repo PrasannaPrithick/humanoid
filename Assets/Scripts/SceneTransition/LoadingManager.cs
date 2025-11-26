@@ -56,7 +56,7 @@ public class LoadingManager : MonoBehaviour
             // Real target progress from async operation (0..0.9)
             float target = Mathf.Clamp01(operation.progress / 0.9f);
 
-            // Smoothly move the displayed progress towards the real progress
+            
             displayedProgress = Mathf.MoveTowards(
                 displayedProgress,
                 target,
@@ -74,16 +74,12 @@ public class LoadingManager : MonoBehaviour
                 loadingText.text = $"Loading... {percent}%";
             }
 
-            // When loading is basically done (progress ~0.9)
-            // and the slider has visually almost reached the end,
-            // and the minimum display time has elapsed, then activate.
             bool loadReady = operation.progress >= 0.9f;
             bool uiReady   = displayedProgress >= 0.99f;
             bool timeReady = elapsed >= minDisplayTime;
 
             if (loadReady && uiReady && timeReady)
             {
-                // tiny delay to feel smooth
                 yield return new WaitForSeconds(0.1f);
 
                 operation.allowSceneActivation = true;

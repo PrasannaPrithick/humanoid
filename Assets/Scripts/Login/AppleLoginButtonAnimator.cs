@@ -46,14 +46,8 @@ public class AppleLoginButtonAnimator : MonoBehaviour
     {
         if (_isRunning) return;
 
-        // TODO: put your real login validation here if needed.
         bool loginSuccess = true;
 
-        if (!loginSuccess)
-        {
-            // show "Invalid login" as you already do.
-            return;
-        }
 
         StartCoroutine(PlayPressAndTransition());
     }
@@ -63,14 +57,14 @@ public class AppleLoginButtonAnimator : MonoBehaviour
         _isRunning = true;
         appleLoginButton.interactable = false;
 
-        // 1. Press – quick scale down
+        
         yield return ScaleTo(pressScale, pressDuration);
 
-        // 2. Bounce – slightly overshoot then back to 1
+        
         yield return ScaleTo(bounceScale, bounceDuration * 0.6f);
         yield return ScaleTo(1f,          bounceDuration * 0.4f);
 
-        // 3. Fade out login panel
+        
         if (loginCanvasGroup != null)
         {
             float elapsed = 0f;
@@ -88,7 +82,7 @@ public class AppleLoginButtonAnimator : MonoBehaviour
             loginCanvasGroup.blocksRaycasts = false;
         }
 
-        // 4. Go to loading scene → humanoid
+        
         SceneLoader.LoadWithLoadingScreen(nextSceneName);
     }
 
@@ -105,8 +99,8 @@ public class AppleLoginButtonAnimator : MonoBehaviour
         {
             elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / duration);
-            // smooth easing
-            t = t * t * (3f - 2f * t); // SmoothStep
+            
+            t = t * t * (3f - 2f * t);
             buttonRect.localScale = Vector3.Lerp(start, end, t);
             yield return null;
         }

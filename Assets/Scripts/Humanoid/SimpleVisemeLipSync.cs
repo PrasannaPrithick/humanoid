@@ -5,8 +5,8 @@ public class SimpleVisemeLipSync : MonoBehaviour
 {
     
     [Header("Smile")]
-    public int smileIndex1 = 0; // MTH_SMILE1
-    public int smileIndex2 = 1; // MTH_SMILE2
+    public int smileIndex1 = 0;
+    public int smileIndex2 = 1;
     public float smileMax = 60f;
     float currentSmile1, currentSmile2;
     
