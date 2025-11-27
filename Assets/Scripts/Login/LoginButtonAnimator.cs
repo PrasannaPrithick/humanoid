@@ -1,11 +1,12 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class AppleLoginButtonAnimator : MonoBehaviour
+public class LoginButtonAnimator  : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private Button appleLoginButton;
+    [SerializeField] private Button loginButton;
     [SerializeField] private RectTransform buttonRect;
     [SerializeField] private CanvasGroup loginCanvasGroup;
 
@@ -19,52 +20,82 @@ public class AppleLoginButtonAnimator : MonoBehaviour
     [Header("Flow")]
     [SerializeField] private string nextSceneName = "Scene_Humanoid";
 
+    [Header("Login Logic")]
+    [SerializeField] private GoogleLoginManager googleLoginManager;
+    [SerializeField] private GameObject errorTextObject;
+
     private Vector3 _originalScale;
     private bool _isRunning;
 
     private void Awake()
     {
-        if (appleLoginButton == null)
-            appleLoginButton = GetComponent<Button>();
+        if (loginButton == null)
+            loginButton = GetComponent<Button>();
 
-        if (buttonRect == null && appleLoginButton != null)
-            buttonRect = appleLoginButton.GetComponent<RectTransform>();
+        if (buttonRect == null && loginButton != null)
+            buttonRect = loginButton.GetComponent<RectTransform>();
 
         if (buttonRect != null)
             _originalScale = buttonRect.localScale;
 
-        appleLoginButton.onClick.AddListener(OnButtonPressed);
+        if (loginButton != null)
+            loginButton.onClick.AddListener(OnButtonPressed);
+
+        if (errorTextObject != null)
+            errorTextObject.SetActive(false);
     }
+    
+    
 
     private void OnDestroy()
     {
-        if (appleLoginButton != null)
-            appleLoginButton.onClick.RemoveListener(OnButtonPressed);
+        if (loginButton != null)
+            loginButton.onClick.RemoveListener(OnButtonPressed);
     }
 
     private void OnButtonPressed()
     {
         if (_isRunning) return;
 
-        bool loginSuccess = true;
+        if (googleLoginManager == null)
+        {
+            Debug.LogWarning("LoginButtonAnimator: GoogleLoginManager not assigned.");
+            return;
+        }
 
-
-        StartCoroutine(PlayPressAndTransition());
+        loginButton.interactable = false; 
+        googleLoginManager.StartGoogleSignIn(OnLoginCompleted);
     }
+
+
+
+
+    private void OnLoginCompleted(bool success, string message)
+    {
+        Debug.Log("Login completed: success=" + success + " message=" + message);
+
+        if (success)
+        {
+            _isRunning = true;
+            StartCoroutine(PlayPressAndTransition());
+        }
+        else
+        {
+            loginButton.interactable = true;
+
+            if (errorTextObject != null)
+                errorTextObject.SetActive(true);
+        }
+    }
+
+
 
     private IEnumerator PlayPressAndTransition()
     {
-        _isRunning = true;
-        appleLoginButton.interactable = false;
-
-        
         yield return ScaleTo(pressScale, pressDuration);
-
-        
         yield return ScaleTo(bounceScale, bounceDuration * 0.6f);
         yield return ScaleTo(1f,          bounceDuration * 0.4f);
 
-        
         if (loginCanvasGroup != null)
         {
             float elapsed = 0f;
@@ -82,7 +113,6 @@ public class AppleLoginButtonAnimator : MonoBehaviour
             loginCanvasGroup.blocksRaycasts = false;
         }
 
-        
         SceneLoader.LoadWithLoadingScreen(nextSceneName);
     }
 
@@ -99,7 +129,6 @@ public class AppleLoginButtonAnimator : MonoBehaviour
         {
             elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / duration);
-            
             t = t * t * (3f - 2f * t);
             buttonRect.localScale = Vector3.Lerp(start, end, t);
             yield return null;

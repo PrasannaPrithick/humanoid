@@ -4,77 +4,49 @@ using UnityEngine.UI;
 
 public class CameraIntro : MonoBehaviour
 {
-    [Header("References")]
-    [SerializeField] private Transform cameraTransform;   
-    [SerializeField] private Button haiButton;            
-
-    [Header("Intro Motion")]
-    [Tooltip("How long the camera move takes (seconds).")]
-    [SerializeField] private float moveDuration = 1.5f;
-
-    [Tooltip("Offset from the final camera position for the intro start.")]
-    [SerializeField] private Vector3 startPositionOffset = new Vector3(0f, -0.7f, -2.5f);
-
-    [Tooltip("Starting rotation (in degrees) for the intro.")]
-    [SerializeField] private Vector3 startEulerAngles = new Vector3(12f, 0f, 0f);
-
-    private Vector3 targetPosition;
-    private Quaternion targetRotation;
-
-    private void Awake()
-    {
-        if (cameraTransform == null)
-        {
-            cameraTransform = Camera.main.transform;
-        }
-
-        
-        targetPosition = cameraTransform.position;
-        targetRotation = cameraTransform.rotation;
-
-        
-        cameraTransform.position = targetPosition + startPositionOffset;
-        cameraTransform.rotation = Quaternion.Euler(startEulerAngles);
-
-        
-        if (haiButton != null)
-        {
-            haiButton.interactable = false;
-        }
-    }
+    [Header("UI")]
+    [SerializeField] private CanvasGroup instructionPanel;
+    [SerializeField] private float fadeDuration = 0.5f;
+    [SerializeField] private float displayDuration = 2.0f;
+    [SerializeField] private Button smileButton;
 
     private void Start()
     {
-        StartCoroutine(PlayIntro());
+        if (smileButton != null)
+            smileButton.interactable = false;
+
+        if (instructionPanel != null)
+            StartCoroutine(IntroRoutine());
+        else if (smileButton != null)
+            smileButton.interactable = true;
     }
 
-    private IEnumerator PlayIntro()
+    private IEnumerator IntroRoutine()
     {
-        float elapsed = 0f;
-
-        Vector3 startPos = cameraTransform.position;
-        Quaternion startRot = cameraTransform.rotation;
-
-        while (elapsed < moveDuration)
+        instructionPanel.alpha = 0f;
+        instructionPanel.gameObject.SetActive(true);
+        
+        float t = 0f;
+        while (t < fadeDuration)
         {
-            elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsed / moveDuration);
-
-            
-            t = t * t * (3f - 2f * t);
-
-            cameraTransform.position = Vector3.Lerp(startPos, targetPosition, t);
-            cameraTransform.rotation = Quaternion.Slerp(startRot, targetRotation, t);
-
+            t += Time.deltaTime;
+            instructionPanel.alpha = Mathf.Clamp01(t / fadeDuration);
+            yield return null;
+        }
+        
+        yield return new WaitForSeconds(displayDuration);
+        
+        t = 0f;
+        while (t < fadeDuration)
+        {
+            t += Time.deltaTime;
+            instructionPanel.alpha = 1f - Mathf.Clamp01(t / fadeDuration);
             yield return null;
         }
 
-        cameraTransform.position = targetPosition;
-        cameraTransform.rotation = targetRotation;
+        instructionPanel.gameObject.SetActive(false);
 
-        if (haiButton != null)
-        {
-            haiButton.interactable = true;
-        }
+        if (smileButton != null)
+            smileButton.interactable = true;
     }
 }
